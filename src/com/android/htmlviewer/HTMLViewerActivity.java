@@ -22,7 +22,6 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Browser;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebChromeClient;
@@ -31,6 +30,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -103,7 +103,7 @@ public class HTMLViewerActivity extends Activity {
             mLoading.setVisibility(View.GONE);
         }
 
-        @Override
+    	@Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Intent intent;
             // Perform generic parsing of the URI to turn it into an Intent.
@@ -122,19 +122,17 @@ public class HTMLViewerActivity extends Activity {
                 selector.addCategory(Intent.CATEGORY_BROWSABLE);
                 selector.setComponent(null);
             }
-            // Pass the package name as application ID so that the intent from the
-            // same application can be opened in the same tab.
-            intent.putExtra(Browser.EXTRA_APPLICATION_ID,
-                    view.getContext().getPackageName());
+ 
             try {
                 view.getContext().startActivity(intent);
             } catch (ActivityNotFoundException ex) {
                 Log.w(TAG, "No application can handle " + url);
-                return false;
+                Toast.makeText(getApplicationContext(),
+                		R.string.url_not_valid, Toast.LENGTH_SHORT).show();
             }
             return true;
         }
-        
+
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view,
                 WebResourceRequest request) {
