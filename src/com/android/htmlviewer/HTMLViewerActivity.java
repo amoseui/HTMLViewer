@@ -111,7 +111,7 @@ public class HTMLViewerActivity extends Activity {
                 intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
             } catch (URISyntaxException ex) {
                 Log.w(TAG, "Bad URI " + url + ": " + ex.getMessage());
-                return false;
+                return true;
             }
             // Sanitize the Intent, ensuring web pages can not bypass browser
             // security (only access to BROWSABLE activities).
@@ -122,7 +122,7 @@ public class HTMLViewerActivity extends Activity {
                 selector.addCategory(Intent.CATEGORY_BROWSABLE);
                 selector.setComponent(null);
             }
- 
+
             try {
                 view.getContext().startActivity(intent);
             } catch (ActivityNotFoundException ex) {
