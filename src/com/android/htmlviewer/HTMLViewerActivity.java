@@ -103,7 +103,7 @@ public class HTMLViewerActivity extends Activity {
             mLoading.setVisibility(View.GONE);
         }
 
-    	@Override
+        @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Intent intent;
             // Perform generic parsing of the URI to turn it into an Intent.
@@ -111,6 +111,8 @@ public class HTMLViewerActivity extends Activity {
                 intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
             } catch (URISyntaxException ex) {
                 Log.w(TAG, "Bad URI " + url + ": " + ex.getMessage());
+                Toast.makeText(HTMLViewerActivity.this,
+                        R.string.cannot_open_link, Toast.LENGTH_SHORT).show();
                 return true;
             }
             // Sanitize the Intent, ensuring web pages can not bypass browser
@@ -127,8 +129,8 @@ public class HTMLViewerActivity extends Activity {
                 view.getContext().startActivity(intent);
             } catch (ActivityNotFoundException ex) {
                 Log.w(TAG, "No application can handle " + url);
-                Toast.makeText(getApplicationContext(),
-                		R.string.url_not_valid, Toast.LENGTH_SHORT).show();
+                Toast.makeText(HTMLViewerActivity.this,
+                        R.string.cannot_open_link, Toast.LENGTH_SHORT).show();
             }
             return true;
         }
