@@ -22,6 +22,12 @@ android {
 
     defaultConfig {
         applicationId "com.android.htmlviewer"
+        minSdkVersion 14
+        targetSdkVersion 23
+    }
+
+    dependencies {
+        compile 'com.android.support:support-v4:23.+'
     }
 
     buildTypes {
