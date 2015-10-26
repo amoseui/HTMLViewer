@@ -17,6 +17,6 @@
 <resources>
     <!-- Title of the HTML Viewer activity. -->
     <string name="app_label">HTML Viewer</string>
-    <string name="url_not_valid">URL is invalid.</string>
+    <string name="cannot_open_link">No application can open this link.</string>
 </resources>
 
