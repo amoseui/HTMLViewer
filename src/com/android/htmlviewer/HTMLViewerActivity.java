@@ -83,7 +83,7 @@ public class HTMLViewerActivity extends Activity {
         s.setDefaultTextEncodingName("utf-8");
 
         requestRuntimePermissionIfNeeded();
-        }
+    }
 
     @Override
     protected void onDestroy() {
@@ -117,22 +117,14 @@ public class HTMLViewerActivity extends Activity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_READ_EXTERNAL_STORAGE:
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    loadUrl();
-                } else {
-                    finish();
-                    Toast.makeText(HTMLViewerActivity.this,
-                            R.string.turn_on_storage_permission, Toast.LENGTH_SHORT).show();
-                }
-                return;
-            default:
-                finish();
-                Toast.makeText(HTMLViewerActivity.this,
-                        R.string.turn_on_storage_permission, Toast.LENGTH_SHORT).show();
-                return;
+        if (requestCode == REQUEST_READ_EXTERNAL_STORAGE
+                && grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            loadUrl();
+        } else {
+            finish();
+            Toast.makeText(HTMLViewerActivity.this,
+                    R.string.turn_on_storage_permission, Toast.LENGTH_SHORT).show();
         }
     }
 
