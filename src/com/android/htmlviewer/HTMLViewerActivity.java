@@ -16,18 +16,14 @@
 
 package com.android.htmlviewer;
 
-import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.Manifest;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebChromeClient;
@@ -51,10 +47,9 @@ import java.util.zip.GZIPInputStream;
 public class HTMLViewerActivity extends Activity {
     private static final String TAG = "HTMLViewer";
 
-    private static final int REQUEST_READ_EXTERNAL_STORAGE = 1;
-
     private WebView mWebView;
     private View mLoading;
+    private Intent mIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,50 +77,56 @@ public class HTMLViewerActivity extends Activity {
         s.setJavaScriptEnabled(false);
         s.setDefaultTextEncodingName("utf-8");
 
-        requestRuntimePermissionIfNeeded();
+        requestRuntimePermission();
+    }
+
+    private void loadUrl() {
+        if (mIntent.hasExtra(Intent.EXTRA_TITLE)) {
+            setTitle(mIntent.getStringExtra(Intent.EXTRA_TITLE));
+        }
+        mWebView.loadUrl(String.valueOf(mIntent.getData()));
+    }
+
+    private void requestRuntimePermission() {
+        mIntent = getIntent();
+        Uri destination = mIntent.getData();
+        if (destination != null) {
+            // Is this a local file?
+            if ("file".equals(destination.getScheme())) {
+                if (PackageManager.PERMISSION_DENIED ==
+                        checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    // If we don't have local file permissions, save the destination so we can try
+                    // again once they're granted.
+                    requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+                } else {
+                    loadUrl();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        // We only ever request 1 permission, so these arguments should always have the same form.
+        assert permissions.length == 1;
+        assert Manifest.permission.READ_EXTERNAL_STORAGE.equals(permissions[0]);
+        assert grantResults.length == 1;
+
+        if (PackageManager.PERMISSION_GRANTED == grantResults[0]) {
+            // Try again now that we have the permission.
+            loadUrl();
+        } else {
+            Toast.makeText(HTMLViewerActivity.this,
+                    R.string.turn_on_storage_permission, Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mWebView.destroy();
-    }
-
-    private void loadUrl() {
-        final Intent intent = getIntent();
-        if (intent.hasExtra(Intent.EXTRA_TITLE)) {
-            setTitle(intent.getStringExtra(Intent.EXTRA_TITLE));
-        }
-        mWebView.loadUrl(String.valueOf(intent.getData()));
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    private void requestRuntimePermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            loadUrl();
-            return;
-        }
-        if (ContextCompat.checkSelfPermission(HTMLViewerActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(HTMLViewerActivity.this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    REQUEST_READ_EXTERNAL_STORAGE);
-        } else {
-            loadUrl();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == REQUEST_READ_EXTERNAL_STORAGE
-                && grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            loadUrl();
-        } else {
-            finish();
-            Toast.makeText(HTMLViewerActivity.this,
-                    R.string.turn_on_storage_permission, Toast.LENGTH_SHORT).show();
-        }
     }
 
     private class ChromeClient extends WebChromeClient {
