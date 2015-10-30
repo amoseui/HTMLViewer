@@ -107,7 +107,7 @@ public class HTMLViewerActivity extends Activity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+            String permissions[], int[] grantResults) {
         // We only ever request 1 permission, so these arguments should always have the same form.
         assert permissions.length == 1;
         assert Manifest.permission.READ_EXTERNAL_STORAGE.equals(permissions[0]);
