@@ -24,7 +24,6 @@ import android.content.pm.PackageManager;
 import android.Manifest;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebChromeClient;
@@ -35,7 +34,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -79,7 +77,8 @@ public class HTMLViewerActivity extends Activity {
         s.setJavaScriptEnabled(false);
         s.setDefaultTextEncodingName("utf-8");
 
-        requestRuntimePermission();
+        mIntent = getIntent();
+        requestPermissionAndLoad();
     }
 
     private void loadUrl() {
@@ -89,17 +88,13 @@ public class HTMLViewerActivity extends Activity {
         mWebView.loadUrl(String.valueOf(mIntent.getData()));
     }
 
-    private void requestRuntimePermission() {
-        mIntent = getIntent();
+    private void requestPermissionAndLoad() {
         Uri destination = mIntent.getData();
         if (destination != null) {
-            File extStorageDir = Environment.getExternalStorageDirectory();
             // Is this a local file?
-            if (destination.getPath().contains(extStorageDir.toString())
+            if ("file".equals(destination.getScheme())
                     && PackageManager.PERMISSION_DENIED ==
-                    checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                // If we don't have local file permissions, save the destination so we can try
-                // again once they're granted.
+                            checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
             } else {
                 loadUrl();
